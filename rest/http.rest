@@ -1,0 +1,29 @@
+@HOST_NAME=http://localhost:8080/api
+@TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imx0a2VtMjEwM0BnbWFpbC5jb20iLCJuYW1lIjoiTGUgVHVhbiBLaGFuaCBFbSIsImV4cCI6MTY3OTIxMjg5MH0.mqfjOqu5YMo4NxFhU4gqkX5-OYBDoINBedHfeFoSCu4
+
+GET {{HOST_NAME}}/check-health
+
+###
+POST {{HOST_NAME}}/user/register
+Content-Type: application/json
+
+{
+    "email": "vuhangle2105@gmail.com",
+    "name": "Vu Hang Le",
+    "password": "password"
+}
+
+
+###
+POST {{HOST_NAME}}/user/login
+Content-Type: "application/json"
+
+{
+    "email": "ltkem2103@gmail.com",
+    "password": "password"
+}
+
+
+###
+GET {{HOST_NAME}}/user/get
+Authorization: {{TOKEN}}
