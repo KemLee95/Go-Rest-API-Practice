@@ -1,0 +1,15 @@
+@HOST = http://localhost:8080
+
+
+GET {{HOST}}/check-heath
+Content-Type: "application/json"
+
+###
+POST {{HOST}}/user/sign-up
+Content-Type: "application/json"
+
+{
+    "email": "ltkem2103@gmail.com",
+    "name": "Kem Lee",
+    "password": "password"
+}
