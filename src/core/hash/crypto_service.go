@@ -2,7 +2,7 @@ package hash
 
 import (
 	"crypto/md5"
-	"io"
+	"encoding/hex"
 )
 
 type IHashService interface {
@@ -20,11 +20,15 @@ var (
 
 func (ser *hashService) Bcrypt(value string) string {
 	hash := md5.New()
-	io.WriteString(hash, value)
-	return string(hash.Sum(nil))
+	hash.Write([]byte(value))
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 func (ser *hashService) BcryptCompare(value, hashedValue string) bool {
+	stringHashed := ser.Bcrypt(value)
+	if stringHashed == hashedValue {
+		return true
+	}
 	return false
 }
 

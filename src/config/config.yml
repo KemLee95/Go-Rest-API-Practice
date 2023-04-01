@@ -1,4 +1,5 @@
 port: 8080
+defaultLanguages: "en"
 
 auth:
   hash_salt: "hash_salt"

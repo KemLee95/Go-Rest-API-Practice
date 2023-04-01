@@ -13,12 +13,76 @@ type userSignUpDto struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type userLoginDto struct {
+	Email    string `json:"email" binding:"email,required"`
+	Password string `json:"password" binding:"required"`
+}
+type ResponseData struct {
+	status  bool
+	message string
+	data    interface{}
+}
+type getUserSerialization struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
 type UserController struct {
 	userService userService.IUserService
 }
 
-func (userContr *UserController) GetUser() {
+func (userContr *UserController) GetUser(ctx *gin.Context) {
+	id := ctx.Param("id")
 
+	exist, err := userContr.userService.CheckIdExist(ctx.Request.Context(), id)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if !exist {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
+			"status":  false,
+			"message": "The user not found",
+			"data":    nil,
+		})
+		return
+	}
+
+	user, err := userContr.userService.GetUserById(ctx.Request.Context(), id)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	userSerialization := &getUserSerialization{
+		Email: user.Email,
+		Name:  user.Name,
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"status":  true,
+		"message": "Retrieve successfully",
+		"data":    userSerialization,
+	})
+}
+
+func (userContr *UserController) ListUser(ctx *gin.Context) {
+	users, err := userContr.userService.GetUserList(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	var usersSerialization []*getUserSerialization
+	for _, user := range users {
+		usersSerialization = append(usersSerialization, &getUserSerialization{
+			Email: user.Email,
+			Name:  user.Name,
+		})
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"status":  true,
+		"message": "Retrieve successfully",
+		"data":    usersSerialization,
+	})
 }
 
 func (userContr *UserController) SignUp(ctx *gin.Context) {
@@ -57,16 +121,27 @@ func (userContr *UserController) SignUp(ctx *gin.Context) {
 	})
 }
 
-func UserControllerRegister(router *gin.Engine, userService userService.IUserService) {
-	controller := NewUserController(userService)
-	endPoint := router.Group("/user")
-	{
-		endPoint.POST("/sign-up", controller.SignUp)
+func (contr *UserController) SignIn(ctx *gin.Context) {
+	input := &userLoginDto{}
+	if err := ctx.BindJSON(input); err != nil {
+		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+		return
 	}
 }
 
 func NewUserController(userSer userService.IUserService) *UserController {
 	return &UserController{
 		userService: userSer,
+	}
+}
+
+func UserControllerRegister(router *gin.Engine, userService userService.IUserService) {
+	controller := NewUserController(userService)
+	endPoint := router.Group("/user")
+	{
+		endPoint.POST("/sign-up", controller.SignUp)
+		endPoint.POST("/login", controller.SignIn)
+		endPoint.GET("/list", controller.ListUser)
+		endPoint.GET("/get/:id", controller.GetUser)
 	}
 }

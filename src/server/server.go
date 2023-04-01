@@ -11,9 +11,13 @@ import (
 	"github.com/gin-gonic/gin"
 	config "github.com/kemlee/go-rest-api-practise/config"
 	controller "github.com/kemlee/go-rest-api-practise/controller"
-	hashService "github.com/kemlee/go-rest-api-practise/hash"
+	encryptionService "github.com/kemlee/go-rest-api-practise/core/encryption"
+	hashService "github.com/kemlee/go-rest-api-practise/core/hash"
+
+	middleware "github.com/kemlee/go-rest-api-practise/core/middleware"
 	userService "github.com/kemlee/go-rest-api-practise/user"
 	userRepository "github.com/kemlee/go-rest-api-practise/user/repository"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -27,7 +31,8 @@ func NewServer() *Server {
 	db := registerDatabaseRoot()
 	userRepo := userRepository.GetUserRepository(db)
 	hashSer := hashService.GetHashService()
-	userService := userService.GetUserService(userRepo, hashSer)
+	encryptionSer := encryptionService.New()
+	userService := userService.GetUserService(userRepo, hashSer, encryptionSer)
 
 	return &Server{
 		userService: userService,
@@ -40,6 +45,8 @@ func (server *Server) Run() error {
 	router.Use(
 		gin.Recovery(),
 		gin.Logger(),
+		middleware.CorsMiddleware(config),
+		middleware.LanguageMiddleware(config),
 	)
 
 	// Add controller

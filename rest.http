@@ -13,3 +13,12 @@ Content-Type: "application/json"
     "name": "Kem Lee",
     "password": "password"
 }
+
+###
+GET {{HOST}}/user/get/642450fca3d31f510c0df407
+Content-Type: "application/json"
+
+###
+GET {{HOST}}/user/list
+x-language-code: "en,ch" 
+Content-Type: "application/json"
