@@ -9,6 +9,12 @@ type ApiConfig struct {
 	Database         databaseConfig
 	DefaultLanguages string
 	Cors             corsConfig
+	JWTConfig        JWTConfig
+}
+type JWTConfig struct {
+	PrivateKey             string
+	AccessTokenExpiration  int
+	RefreshTokenExpiration int
 }
 type databaseConfig struct {
 	Uri  string
@@ -33,6 +39,11 @@ func GetAPIConfig() (*ApiConfig, error) {
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, err
+	}
+	jwtConfig := JWTConfig{
+		PrivateKey:             viper.GetString("jwt.private_key"),
+		AccessTokenExpiration:  viper.GetInt("jwt.access_token_expiration"),
+		RefreshTokenExpiration: viper.GetInt("jwt.refresh_token_expiration"),
 	}
 	config = &ApiConfig{
 		Port: viper.GetString("port"),
@@ -73,6 +84,7 @@ func GetAPIConfig() (*ApiConfig, error) {
 				"DELETE",
 			},
 		},
+		JWTConfig: jwtConfig,
 	}
 	return config, nil
 }

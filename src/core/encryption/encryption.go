@@ -9,7 +9,7 @@ import (
 type encryptionService struct{}
 
 type IEncryptionService interface {
-	JWTEncrypt(payload []byte, options JWTEncryptOptions) string
+	JWTEncrypt(payload []byte, options JWTEncryptOptions) (string, error)
 }
 
 type AppClaims struct {
@@ -27,7 +27,7 @@ func New() *encryptionService {
 	return &encryptionService{}
 }
 
-func (ser *encryptionService) JWTEncrypt(payload []byte, options JWTEncryptOptions) string {
+func (ser *encryptionService) JWTEncrypt(payload []byte, options JWTEncryptOptions) (string, error) {
 	claims := &AppClaims{
 		payload,
 		jwt.RegisteredClaims{
@@ -37,10 +37,11 @@ func (ser *encryptionService) JWTEncrypt(payload []byte, options JWTEncryptOptio
 			Subject:   options.Subject,
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
-	signedToken, err := token.SignedString(options.SecretKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	key := []byte(options.SecretKey)
+	signedToken, err := token.SignedString(key)
 	if err != nil {
-		return ""
+		return "", err
 	}
-	return signedToken
+	return signedToken, nil
 }

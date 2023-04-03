@@ -127,6 +127,17 @@ func (contr *UserController) SignIn(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
 		return
 	}
+	token, err := contr.userService.SignIn(ctx.Request.Context(), input.Email, input.Password)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"status":  true,
+		"message": "Successfully",
+		"token":   token,
+	})
 }
 
 func NewUserController(userSer userService.IUserService) *UserController {

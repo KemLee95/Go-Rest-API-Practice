@@ -123,6 +123,7 @@ func (repo *userRepository) GetUserByEmail(ctx context.Context, email string) (*
 	options := options.FindOne().SetProjection(bson.D{
 		{Key: "email", Value: 1},
 		{Key: "name", Value: 1},
+		{Key: "password", Value: 1},
 	})
 	err := repo.db.FindOne(ctx, filters, options).Decode(user)
 	if err != nil {
